@@ -13,7 +13,7 @@ st.markdown("Predict hourly energy usage for the next 7 days using a machine lea
 
 # --------------------- Load Model ---------------------
 try:
-    model = joblib.load("final_model.pkl")
+    model = joblib.load("xgb_energy_forecast_model.joblib")
     st.success("✅ Model loaded successfully!")
 except Exception as e:
     st.error(f"❌ Error loading model: {e}")
@@ -64,3 +64,4 @@ st.line_chart(future_df['Forecast_MW'])
 # --------------------- Download Option ---------------------
 csv_data = future_df.reset_index()[['Datetime', 'Forecast_MW']].to_csv(index=False).encode('utf-8')
 st.download_button("⬇️ Download Forecast Data (CSV)", data=csv_data, file_name='forecast.csv', mime='text/csv')
+
