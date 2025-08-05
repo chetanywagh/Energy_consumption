@@ -1,10 +1,9 @@
-# app.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 from datetime import timedelta
+import matplotlib.pyplot as plt
 
 # ---------------------------- CONFIGURATION ---------------------------- #
 st.set_page_config(page_title="PJM Energy Forecast", layout="wide")
@@ -28,7 +27,7 @@ if not model:
 @st.cache_data
 def load_past_data():
     try:
-        df = pd.read_csv("C:\Users\Lenovo\OneDrive\Desktop\project Deployment Excelr\new project 2 ExcelR\PJMW_hourly.csv", parse_dates=["Datetime"], index_col="Datetime")
+        df = pd.read_csv("PJMW_hourly.csv", parse_dates=["Datetime"], index_col="Datetime")
         return df
     except Exception as e:
         st.error(f"❌ Error loading past data: {e}")
@@ -40,7 +39,8 @@ if data is None:
 
 # ---------------------------- USER INPUT ---------------------------- #
 st.sidebar.header("🔧 Forecast Settings")
-forecast_days = st.sidebar.slider("Select forecast duration (days)", 1, 7, 3)
+forecast_days = st.sidebar.slider("Select forecast duration (days)", 1, 30, 7)
+forecast_hours = forecast_days * 24
 
 # ---------------------------- FEATURE ENGINEERING ---------------------------- #
 def generate_features(data, forecast_hours):
@@ -63,7 +63,6 @@ def generate_features(data, forecast_hours):
 
     return future_df
 
-forecast_hours = forecast_days * 24
 future_df = generate_features(data, forecast_hours)
 
 # ---------------------------- PREDICTION ---------------------------- #
@@ -77,16 +76,22 @@ except Exception as e:
 
 # ---------------------------- OUTPUT DISPLAY ---------------------------- #
 st.subheader(f"📊 Forecast for Next {forecast_days} Days (Hourly)")
-st.line_chart(future_df['Forecast_MW'])
+fig, ax = plt.subplots(figsize=(12, 5))
+ax.plot(future_df.index, future_df['Forecast_MW'], marker='o', linestyle='-', label='Forecast')
+ax.set_title(f"PJM Forecast for {forecast_days} Days")
+ax.set_xlabel("Datetime")
+ax.set_ylabel("Forecasted MW")
+ax.grid(True)
+ax.legend()
+st.pyplot(fig)
 
 # ---------------------------- DOWNLOAD OPTION ---------------------------- #
 download_df = future_df.reset_index().rename(columns={"index": "Datetime"})
 csv_data = download_df[['Datetime', 'Forecast_MW']].to_csv(index=False).encode('utf-8')
 
 st.download_button(
-    label="⬇️ Download Forecast as CSV",
+    label="⬇️ Download Forecast CSV",
     data=csv_data,
-    file_name="pjm_forecast.csv",
+    file_name=f"pjm_forecast_{forecast_days}_days.csv",
     mime="text/csv"
 )
-
