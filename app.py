@@ -28,7 +28,7 @@ if not model:
 @st.cache_data
 def load_past_data():
     try:
-        df = pd.read_csv("PJMW_hourly.csv", parse_dates=["Datetime"], index_col="Datetime")
+        df = pd.read_csv("C:\Users\Lenovo\OneDrive\Desktop\project Deployment Excelr\new project 2 ExcelR\PJMW_hourly.csv", parse_dates=["Datetime"], index_col="Datetime")
         return df
     except Exception as e:
         st.error(f"❌ Error loading past data: {e}")
@@ -89,3 +89,4 @@ st.download_button(
     file_name="pjm_forecast.csv",
     mime="text/csv"
 )
+
