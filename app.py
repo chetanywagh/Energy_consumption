@@ -12,7 +12,7 @@ st.markdown("Forecast hourly energy consumption for the PJMW region.")
 
 # ==================== Load Model ====================
 try:
-    model = joblib.load("final_model.pkl")
+    model = joblib.load("xgb_energy_forecast_model.joblib")
 except Exception as e:
     st.error(f"❌ Error loading model: {e}")
     st.stop()
@@ -73,3 +73,4 @@ st.line_chart(future_df['Forecast_MW'])
 st.subheader("📊 Past vs Forecast Graph")
 combined = pd.concat([data[['PJMW_MW']], future_df[['Forecast_MW']]], axis=0)
 st.line_chart(combined.rename(columns={'PJMW_MW': 'Actual', 'Forecast_MW': 'Forecast'}))
+
