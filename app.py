@@ -1,5 +1,3 @@
-# app.py
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,45 +5,48 @@ import joblib
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
-# Load XGBoost model
-model = joblib.load("xgb_energy_forecast_model.joblib")
+st.set_page_config(page_title="Energy Forecast", layout="wide")
+st.title("⚡ PJM Energy Forecast using XGBoost")
+st.markdown("Predict hourly energy usage for next 1–30 days")
 
-# Last known datetime in training dataset (change this if needed)
+try:
+    model = joblib.load("xgb_energy_forecast_model.joblib")  # Must match training name
+    st.success("✅ Model loaded successfully")
+except Exception as e:
+    st.error(f"❌ Error loading model: {e}")
+    st.stop()
+
+
+n_days = st.slider("Select number of days to predict", min_value=1, max_value=30, value=7)
+
+
 last_datetime = pd.to_datetime("2023-12-31 23:00:00")
 
-# Streamlit UI
-st.set_page_config(page_title="Energy Forecast", layout="wide")
-st.title(" PJM Energy Forecast using XGBoost")
-st.markdown("Predict future hourly energy consumption")
 
-# Input days to forecast
-n_days = st.slider("Select days to predict", 1, 30, 7)
-
-# Generate future datetime
 future_dates = pd.date_range(start=last_datetime + timedelta(hours=1), periods=n_days * 24, freq='H')
 future_df = pd.DataFrame({'Datetime': future_dates})
 future_df.set_index('Datetime', inplace=True)
 
-# Feature engineering (match training phase)
 future_df['hour'] = future_df.index.hour
 future_df['dayofweek'] = future_df.index.dayofweek
 future_df['month'] = future_df.index.month
 future_df['day'] = future_df.index.day
 
-# Select features
-features = future_df[['hour', 'dayofweek', 'month', 'day']]
+# Adjust column names as per training data
+features = future_df[['hour', 'dayofweek', 'month', 'day']]  # Must match order + names
 
-# Make predictions
-future_df['Forecast_MW'] = model.predict(features)
+try:
+    future_df['Forecast_MW'] = model.predict(features)
+except Exception as e:
+    st.error(f"❌ Prediction error: {e}")
+    st.stop()
 
-# Plot predictions
-st.subheader(" Forecasted Energy Usage")
+st.subheader(" Forecast Plot")
 fig, ax = plt.subplots(figsize=(12, 5))
 future_df['Forecast_MW'].plot(ax=ax)
 ax.set_title(f"Forecast for Next {n_days} Days")
-ax.set_ylabel("MW")
+ax.set_ylabel("Energy Usage (MW)")
 st.pyplot(fig)
 
-# Show data table
-st.subheader(" Forecast Table (first 2 days)")
+st.subheader("🔢 Forecast Table (First 48 Hours)")
 st.dataframe(future_df[['Forecast_MW']].head(48).style.format(precision=2))
