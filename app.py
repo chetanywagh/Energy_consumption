@@ -196,7 +196,7 @@ avg_val = np.mean(latest)
 
 st.markdown("###  Forecast Summary")
 col1, col2, col3 = st.columns(3)
-col1.metric(" 🔻 Max Forecast", f"{max_val:.2f} MW")
+col1.metric(" 🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric(" 🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric(" 🔻 Avg Forecast", f"{avg_val:.2f} MW")
 
@@ -211,6 +211,7 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
