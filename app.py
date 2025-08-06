@@ -23,7 +23,7 @@ The forecast start date is fixed to **2018-01-02** based on dataset availability
 @st.cache_resource
 def load_model():
     try:
-        return joblib.load(r"E:\xgb_energy_forecast_model.joblib")
+        return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
         st.error(f"Error loading model: {e}")
         st.stop()
@@ -36,7 +36,7 @@ model = load_model()
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_excel(r"C:\Users\bhupe\Downloads\PJMW_MW_Hourly.xlsx", parse_dates=["Datetime"])
+        df = pd.read_csv("PJMW_hourly", parse_dates=["Datetime"])
         df.set_index("Datetime", inplace=True)
         daily_df = df.resample("D").mean()
         return daily_df
@@ -152,3 +152,4 @@ st.download_button("📥 Download Forecast Data as CSV",
                    data=forecast_df.reset_index().to_csv(index=False),
                    file_name="daily_forecast.csv",
                    mime="text/csv")
+
