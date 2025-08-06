@@ -23,7 +23,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("background_image.jpeg")
+img_base64 = get_base64_image("new image.jpeg")
 
 st.markdown(
     f"""
@@ -75,7 +75,7 @@ st.markdown(
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-st.title("🔌 PJM Daily Energy Forecast")
+st.title(" PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -215,3 +215,4 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
