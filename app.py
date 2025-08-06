@@ -7,44 +7,71 @@ from datetime import timedelta, datetime, time
 import warnings
 warnings.filterwarnings('ignore')
 
-# -------------------------
-# Page Configuration & CSS
-# -------------------------
+# -------------------------------------
+# Page Config + Custom Styling
+# -------------------------------------
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
-# Inject custom CSS for background and styling
 st.markdown("""
     <style>
-    .main {
-        background-color: #f7f9fc;
-        padding: 2rem;
-        border-radius: 10px;
-    }
+    /* Background Gradient */
     .reportview-container {
-        background: linear-gradient(135deg, #dbe9f4 0%, #f8fbfe 100%);
+        background: linear-gradient(135deg, #e9f1f7 0%, #fefefe 100%);
     }
+
+    /* White stylish sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Title and sliders */
     h1 {
         color: #0A5275;
     }
+
     .stSlider > div[data-baseweb="slider"] > div {
         background-color: #0A5275;
     }
+
+    /* Buttons */
     .stDownloadButton button {
         background-color: #0A5275;
         color: white;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+    }
+
+    .stDownloadButton button:hover {
+        background-color: #06394f;
+        color: white;
+    }
+
+    /* Metric style */
+    .element-container:has(div[data-testid="stMetric"]) p {
+        font-size: 16px;
+        font-weight: 600;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Title & Intro
+# Logo (optional)
+# -------------------------
+st.image("cf1c74d9-df02-4984-afdf-f3c1cc2cc8af.png", width=100)
+
+# -------------------------
+# Title & Introduction
 # -------------------------
 st.title("🔌 PJM Daily Energy Forecast")
+
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
-- 📆 Forecast start date is fixed at **2018-01-02**
-- 🔍 Data is resampled from hourly to daily granularity
+- 📅 Forecast start date is fixed at **2018-01-02**
+- 📊 Data is resampled from hourly to daily granularity
 """)
 
 # -------------------------
@@ -88,7 +115,7 @@ def create_features(df):
     return df
 
 # -------------------------
-# Sidebar: Forecast Settings
+# Sidebar Controls
 # -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
 
@@ -102,7 +129,7 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
 # -------------------------
-# Forecasting Logic
+# Forecast Logic
 # -------------------------
 df = data.copy()
 df = create_features(df)
@@ -131,27 +158,28 @@ for i in range(future_days):
     predictions.append((datetime.combine(next_date.date(), start_time), pred))
 
 # -------------------------
-# Forecast Output
+# Output Plot Data
 # -------------------------
 forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set_index("Datetime")
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
 # -------------------------
-# Forecast Chart
+# Plot
 # -------------------------
-st.subheader("📈 Energy Forecast Plot")
+st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
 ax.set_xlabel("Date")
 ax.set_ylabel("MW")
-ax.set_title("Daily Energy Consumption Forecast", fontsize=14)
+ax.set_title("Daily Energy Consumption Forecast")
 fig.autofmt_xdate()
+
 st.pyplot(fig)
 
 # -------------------------
-# Summary Stats Box
+# Summary Section
 # -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
@@ -162,10 +190,10 @@ st.markdown("### 📊 Forecast Summary")
 col1, col2, col3 = st.columns(3)
 col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
-col3.metric("📉 Avg Forecast", f"{avg_val:.2f} MW")
+col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
-# Download CSV
+# Download Button
 # -------------------------
 st.download_button(
     label="📥 Download Forecast CSV",
