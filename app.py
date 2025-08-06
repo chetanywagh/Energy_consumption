@@ -72,8 +72,8 @@ st.title(" PJM Daily Energy Forecast")
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
--  Forecast start date is fixed at **2018-01-02**
--  Data is resampled from hourly to daily granularity
+-📅  Forecast start date is fixed at **2018-01-02**
+-📊 Data is resampled from hourly to daily granularity
 """)
 
 
@@ -108,11 +108,11 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
-st.sidebar.header(" Forecast Settings")
+st.sidebar.header("🛠️ Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f" `{start_date}` (fixed)")
+st.sidebar.markdown(f" 📅`{start_date}` (fixed)")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
@@ -126,7 +126,7 @@ df.dropna(inplace=True)
 predictions = []
 last_known = df.copy()
 
-with st.spinner(" Generating Forecast..."):
+with st.spinner("🔮 Generating Forecast..."):
     for i in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
@@ -150,7 +150,7 @@ forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
-st.subheader(" Energy Forecast Plot")
+st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -166,20 +166,21 @@ max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("###  Forecast Summary")
+st.markdown("### 📊 Forecast Summary")
 col1, col2, col3 = st.columns(3)
-col1.metric(" Max Forecast", f"{max_val:.2f} MW")
-col2.metric(" Min Forecast", f"{min_val:.2f} MW")
-col3.metric(" Avg Forecast", f"{avg_val:.2f} MW")
+col1.metric(" 🔺 Max Forecast", f"{max_val:.2f} MW")
+col2.metric(" 🔻 Min Forecast", f"{min_val:.2f} MW")
+col3.metric(" 📈 Avg Forecast", f"{avg_val:.2f} MW")
 
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
 st.download_button(
-    label=" Download Forecast CSV",
+    label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
