@@ -53,22 +53,23 @@ st.markdown(
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }}
 
-    /* Title size */
-    h1 {{
-        font-size: 35px !important;
-        font-weight: 700 !important;
-    }}
+   /* Title */
+h1 {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+}
 
-    /* Sub-title size */
-    h2 {{
-        font-size: 30px !important;
-        font-weight: 600 !important;
-    }}
+/* Sub-title */
+h2 {
+    font-size: 26px !important;
+    font-weight: 600 !important;
+}
 
-    /* All other text size */
-    p, label, div, span {{
-        font-size: 25px !important;
-    }}
+/* Body Text, Labels, Sidebar */
+p, label, div, span {
+    font-size: 20px !important;
+}
+
 
     .stDownloadButton button {{
         background-color: #81D4FA;
@@ -238,4 +239,5 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
