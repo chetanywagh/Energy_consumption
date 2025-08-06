@@ -11,7 +11,7 @@ import base64
 warnings.filterwarnings('ignore')
 
 # -------------------------
-# Set Page Config
+# Page Config
 # -------------------------
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
@@ -33,36 +33,51 @@ st.markdown(
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        color: white;
     }}
+
+    .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6, .stApp p {{
+        color: white !important;
+        text-shadow: 1px 1px 2px #000;
+    }}
+
     section[data-testid="stSidebar"] {{
         background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        color: #0A5275;
     }}
-    h1 {{ color: #0A5275; }}
+
     .stSlider > div[data-baseweb="slider"] > div > div {{
         background-color: white !important;
         border: 1px solid #ccc !important;
         border-radius: 5px;
     }}
+
     .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
         background-color: #0A5275 !important;
         border: 2px solid white;
     }}
+
     .stDownloadButton button {{
         background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
+
     .stDownloadButton button:hover {{
         background-color: #06394f;
     }}
+
     .element-container:has(div[data-testid="stMetric"]) p {{
         font-size: 16px;
         font-weight: 600;
+        color: white !important;
+        text-shadow: 1px 1px 2px #000;
     }}
+
     footer {{visibility: hidden;}}
     </style>
     """,
@@ -70,12 +85,12 @@ st.markdown(
 )
 
 # -------------------------
-# Logo
+# Logo (optional)
 # -------------------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-st.title(" PJM Daily Energy Forecast")
+st.title("🔌 PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -201,7 +216,7 @@ col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
-# Table
+# Forecast Table
 # -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
@@ -215,4 +230,3 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
