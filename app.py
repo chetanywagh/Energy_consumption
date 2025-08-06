@@ -111,6 +111,7 @@ def create_features(df):
 
 st.sidebar.header("🛠️ Forecast Settings")
 
+
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
 st.sidebar.markdown(f" 📅`{start_date}` (fixed)")
@@ -182,6 +183,7 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
