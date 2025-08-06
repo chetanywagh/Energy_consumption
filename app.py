@@ -73,6 +73,7 @@ st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
 -📅  Forecast start date is fixed at **2018-01-02**
+
 -📊 Data is resampled from hourly to daily granularity
 """)
 
@@ -181,6 +182,7 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
