@@ -16,56 +16,58 @@ warnings.filterwarnings('ignore')
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
 # -------------------------
-# Background Image Styling
+# Load & Encode Background Image
 # -------------------------
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # ✅ Your image file
+img_base64 = get_base64_image("new image.jpeg")
 
+# -------------------------
+# Custom Styling (Image + Gradient + Text Colors)
+# -------------------------
 st.markdown(
     f"""
     <style>
     .stApp {{
-        background-image: url("data:image/jpeg;base64,{img_base64}");
+        background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+                    url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        color: black;
     }}
+
     section[data-testid="stSidebar"] {{
         background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }}
-    h1 {{ color: black; }}
-    .stMarkdown p, .stText, .stSelectbox, .stSlider label, .stDataFrame {{
+
+    h1, h2, h3, h4, h5, h6, p, label, div {{
         color: black !important;
     }}
-    .stSlider > div[data-baseweb="slider"] > div > div {{
-        background-color: white !important;
-        border: 1px solid #ccc !important;
-        border-radius: 5px;
-    }}
-    .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
-        background-color: #0A5275 !important;
-        border: 2px solid white;
-    }}
+
     .stDownloadButton button {{
         background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
+
     .stDownloadButton button:hover {{
         background-color: #06394f;
     }}
-    .metric-red .stMetricValue {{
-        color: #B22222 !important;
-        font-weight: bold;
+
+    .element-container:has(div[data-testid="stMetric"]) p {{
+        font-size: 16px;
+        font-weight: 600;
+        color: darkred !important;
     }}
+
     footer {{visibility: hidden;}}
     </style>
     """,
@@ -73,12 +75,15 @@ st.markdown(
 )
 
 # -------------------------
-# Logo (optional)
+# Logo (Optional)
 # -------------------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-st.title(" PJM Daily Energy Forecast")
+# -------------------------
+# Title and Description
+# -------------------------
+st.title("🔌 PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -95,7 +100,7 @@ def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f"\u274c Error loading model: {e}")
+        st.error(f"❌ Error loading model: {e}")
         st.stop()
 
 model = load_model()
@@ -111,7 +116,7 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f"\u274c Error loading past data: {e}")
+        st.error(f"❌ Error loading past data: {e}")
         st.stop()
 
 data = load_data()
@@ -142,7 +147,7 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
 # -------------------------
-# Forecast
+# Forecast Logic
 # -------------------------
 df = data.copy()
 df = create_features(df)
@@ -190,38 +195,21 @@ fig.autofmt_xdate()
 st.pyplot(fig)
 
 # -------------------------
-# Forecast Summary (with Red Values)
+# Summary
 # -------------------------
+latest = forecast_df.Forecast_MW.values
+max_val = np.max(latest)
+min_val = np.min(latest)
+avg_val = np.mean(latest)
+
 st.markdown("### 📊 Forecast Summary")
-
-st.markdown("""
-<style>
-.metric-red .stMetricValue {
-    color: #B22222 !important;
-    font-weight: bold;
-}
-</style>
-""", unsafe_allow_html=True)
-
 col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
-    st.metric("🔺 Max Forecast", f"{np.max(forecast_df.Forecast_MW):.2f} MW")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
-    st.metric("🔻 Min Forecast", f"{np.min(forecast_df.Forecast_MW):.2f} MW")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col3:
-    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
-    st.metric("📈 Avg Forecast", f"{np.mean(forecast_df.Forecast_MW):.2f} MW")
-    st.markdown('</div>', unsafe_allow_html=True)
+col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
+col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
+col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
-# Forecast Table
+# Table
 # -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
@@ -230,7 +218,7 @@ st.dataframe(forecast_df.reset_index().head(future_days))
 # Download Button
 # -------------------------
 st.download_button(
-    label="📅 Download Forecast CSV",
+    label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
