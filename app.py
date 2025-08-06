@@ -23,7 +23,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # Change filename if needed
+img_base64 = get_base64_image("new image.jpeg") 
 
 # -------------------------
 # Custom Styling
@@ -55,19 +55,19 @@ st.markdown(
 
     /* Title size */
     h1 {{
-        font-size: 25px !important;
+        font-size: 35px !important;
         font-weight: 700 !important;
     }}
 
     /* Sub-title size */
     h2 {{
-        font-size: 20px !important;
+        font-size: 30px !important;
         font-weight: 600 !important;
     }}
 
     /* All other text size */
     p, label, div, span {{
-        font-size: 15px !important;
+        font-size: 25px !important;
     }}
 
     .stDownloadButton button {{
@@ -238,3 +238,4 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
