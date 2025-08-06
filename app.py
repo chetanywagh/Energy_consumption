@@ -52,14 +52,14 @@ st.markdown(
     }}
 
     .stDownloadButton button {{
-        background-color: #0A5275;
+        background-color: #B3E5FC;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
 
     .stDownloadButton button:hover {{
-        background-color: #06394f;
+        background-color: #81D4FA;
     }}
 
     .element-container:has(div[data-testid="stMetric"]) p {{
@@ -229,3 +229,4 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
