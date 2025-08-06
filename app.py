@@ -23,21 +23,27 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # change to your filename if needed
+img_base64 = get_base64_image("new image.jpeg")  # change to your file name if needed
 
 # -------------------------
-# Custom Styling (light bg + larger metric text + black text + dark red values)
+# Custom Styling (Font, Background, Metric Styling)
 # -------------------------
 st.markdown(
     f"""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap');
+
+    html, body, [class*="css"] {{
+        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
+        color: black;
+    }}
+
     .stApp {{
-        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+        background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
                     url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        color: black;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -52,26 +58,29 @@ st.markdown(
     }}
 
     .stDownloadButton button {{
-        background-color: #B3E5FC;
+        background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
+        font-weight: 600;
     }}
 
     .stDownloadButton button:hover {{
-        background-color: #81D4FA;
+        background-color: #06394f;
     }}
 
     .element-container:has(div[data-testid="stMetric"]) p {{
-        font-size: 20px !important;
-        font-weight: 600;
+        font-size: 22px !important;
+        font-weight: 700 !important;
         color: darkred !important;
+        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
     }}
 
     .element-container:has(div[data-testid="stMetric"]) label {{
-        font-size: 20px !important;
-        font-weight: bold;
+        font-size: 18px !important;
+        font-weight: 600 !important;
         color: black !important;
+        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
     }}
 
     footer {{visibility: hidden;}}
@@ -89,13 +98,13 @@ if os.path.exists("logo.png"):
 # -------------------------
 # Title and Description
 # -------------------------
-st.title(" Energy Consumption Forecast")
+st.title("\ud83d\udd0c PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
--  Forecast start date is fixed at **2018-01-02**  
--  Data is resampled from hourly to daily granularity
+- \ud83d\udcc5 Forecast start date is fixed at **2018-01-02**  
+- \ud83d\udcca Data is resampled from hourly to daily granularity
 """)
 
 # -------------------------
@@ -106,7 +115,7 @@ def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f"❌ Error loading model: {e}")
+        st.error(f"\u274c Error loading model: {e}")
         st.stop()
 
 model = load_model()
@@ -122,7 +131,7 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f"❌ Error loading past data: {e}")
+        st.error(f"\u274c Error loading past data: {e}")
         st.stop()
 
 data = load_data()
@@ -141,11 +150,11 @@ def create_features(df):
 # -------------------------
 # Sidebar
 # -------------------------
-st.sidebar.header("🛠️ Forecast Settings")
+st.sidebar.header("\ud83d\udee0\ufe0f Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f"📅 `{start_date}` (fixed)")
+st.sidebar.markdown(f"\ud83d\udcc5 `{start_date}` (fixed)")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
@@ -162,7 +171,7 @@ df.dropna(inplace=True)
 predictions = []
 last_known = df.copy()
 
-with st.spinner(" Generating Forecast..."):
+with st.spinner("\ud83d\udd2e Generating Forecast..."):
     for i in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
@@ -189,7 +198,7 @@ plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 # -------------------------
 # Plot
 # -------------------------
-st.subheader(" Energy Forecast Plot : ")
+st.subheader("\ud83d\udcc9 Energy Forecast Plot : ")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -201,36 +210,31 @@ fig.autofmt_xdate()
 st.pyplot(fig)
 
 # -------------------------
-# Summary (🎯 Metric Text Size Increased)
+# Summary
 # -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("###  Forecast Summary : ")
+st.markdown("### \ud83c\udf0e Forecast Summary : ")
 col1, col2, col3 = st.columns(3)
-col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
-col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
-col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
+col1.metric("\ud83d\udd3a Max Forecast", f"{max_val:.2f} MW")
+col2.metric("\ud83d\udd3b Min Forecast", f"{min_val:.2f} MW")
+col3.metric("\ud83d\udcc8 Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
 # Table
 # -------------------------
-st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
+st.subheader(f"\ud83d\udccb Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
 # -------------------------
 # Download Button
 # -------------------------
 st.download_button(
-    label=" Download Forecast CSV",
+    label="\ud83d\udcc2 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
-
-
-
-
