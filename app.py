@@ -30,8 +30,17 @@ st.markdown("""
         color: #0A5275;
     }
 
-    .stSlider > div[data-baseweb="slider"] > div {
-        background-color: #0A5275;
+    /* White Slider Track */
+    .stSlider > div[data-baseweb="slider"] > div > div {
+        background-color: white !important;
+        border: 1px solid #ccc !important;
+        border-radius: 5px;
+    }
+
+    /* Slider Thumb (knob) */
+    .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {
+        background-color: #0A5275 !important;
+        border: 2px solid white;
     }
 
     .stDownloadButton button {
