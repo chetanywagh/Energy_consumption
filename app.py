@@ -98,13 +98,13 @@ if os.path.exists("logo.png"):
 # -------------------------
 # Title and Description
 # -------------------------
-st.title("\ud83d\udd0c PJM Daily Energy Forecast")
+st.title(" PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
-- \ud83d\udcc5 Forecast start date is fixed at **2018-01-02**  
-- \ud83d\udcca Data is resampled from hourly to daily granularity
+-  Forecast start date is fixed at **2018-01-02**  
+-  Data is resampled from hourly to daily granularity
 """)
 
 # -------------------------
@@ -154,7 +154,7 @@ st.sidebar.header(" Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f"\ud83d\udcc5 `{start_date}` (fixed)")
+st.sidebar.markdown(f" `{start_date}` (fixed)")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
@@ -219,9 +219,9 @@ avg_val = np.mean(latest)
 
 st.markdown("Forecast Summary : ")
 col1, col2, col3 = st.columns(3)
-col1.metric("\ud83d\udd3a Max Forecast", f"{max_val:.2f} MW")
-col2.metric("\ud83d\udd3b Min Forecast", f"{min_val:.2f} MW")
-col3.metric("\ud83d\udcc8 Avg Forecast", f"{avg_val:.2f} MW")
+col1.metric(" Max Forecast", f"{max_val:.2f} MW")
+col2.metric("Min Forecast", f"{min_val:.2f} MW")
+col3.metric("Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
 # Table
@@ -238,4 +238,5 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
