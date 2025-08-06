@@ -8,9 +8,7 @@ import os
 import warnings
 warnings.filterwarnings('ignore')
 
-# -------------------------------------
-# Page Config + Custom Styling
-# -------------------------------------
+
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
 st.markdown("""
@@ -62,16 +60,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# -------------------------
-# Optional Logo (safe load)
-# -------------------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-# -------------------------
-# Title & Intro
-# -------------------------
-st.title("🔌 PJM Daily Energy Forecast")
+st.title(" PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -80,9 +72,6 @@ This professional web application forecasts **daily energy consumption** (in MW)
 - 📊 Data is resampled from hourly to daily granularity
 """)
 
-# -------------------------
-# Load Model
-# -------------------------
 @st.cache_resource
 def load_model():
     try:
@@ -93,9 +82,6 @@ def load_model():
 
 model = load_model()
 
-# -------------------------
-# Load Dataset
-# -------------------------
 @st.cache_data
 def load_data():
     try:
@@ -109,9 +95,6 @@ def load_data():
 
 data = load_data()
 
-# -------------------------
-# Feature Engineering
-# -------------------------
 def create_features(df):
     df['lag_1'] = df['PJMW_MW'].shift(1)
     df['lag_2'] = df['PJMW_MW'].shift(2)
@@ -120,9 +103,6 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
-# -------------------------
-# Sidebar Controls
-# -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
@@ -134,9 +114,6 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
-# -------------------------
-# Forecast Logic
-# -------------------------
 df = data.copy()
 df = create_features(df)
 df.dropna(inplace=True)
@@ -163,16 +140,10 @@ for i in range(future_days):
     last_known = pd.concat([last_known, next_row])
     predictions.append((datetime.combine(next_date.date(), start_time), pred))
 
-# -------------------------
-# Output Plot Data
-# -------------------------
 forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set_index("Datetime")
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
-# -------------------------
-# Plot
-# -------------------------
 st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -184,9 +155,6 @@ fig.autofmt_xdate()
 
 st.pyplot(fig)
 
-# -------------------------
-# Summary Section
-# -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
@@ -198,12 +166,10 @@ col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
-# -------------------------
-# Download Button
-# -------------------------
 st.download_button(
     label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
