@@ -23,7 +23,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # ✅ Your image path
+img_base64 = get_base64_image("new image.jpeg")  # ✅ Your image file
 
 st.markdown(
     f"""
@@ -33,54 +33,39 @@ st.markdown(
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        color: #B22222 !important;
     }}
-
-    h1, h2, h3, h4, h5, h6 {{
-        color: #B22222 !important;
-    }}
-
     section[data-testid="stSidebar"] {{
-        background-color: rgba(255,255,255,0.9);
+        background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        color: #B22222 !important;
     }}
-
-    .stMarkdown p {{
-        color: #B22222 !important;
-        font-weight: 500;
+    h1 {{ color: black; }}
+    .stMarkdown p, .stText, .stSelectbox, .stSlider label, .stDataFrame {{
+        color: black !important;
     }}
-
     .stSlider > div[data-baseweb="slider"] > div > div {{
         background-color: white !important;
         border: 1px solid #ccc !important;
         border-radius: 5px;
     }}
-
     .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
-        background-color: #B22222 !important;
+        background-color: #0A5275 !important;
         border: 2px solid white;
     }}
-
     .stDownloadButton button {{
-        background-color: #B22222;
+        background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
-
     .stDownloadButton button:hover {{
-        background-color: #800000;
+        background-color: #06394f;
     }}
-
-    .element-container:has(div[data-testid="stMetric"]) p {{
-        font-size: 16px;
-        font-weight: 600;
+    .metric-red .stMetricValue {{
         color: #B22222 !important;
+        font-weight: bold;
     }}
-
     footer {{visibility: hidden;}}
     </style>
     """,
@@ -88,12 +73,12 @@ st.markdown(
 )
 
 # -------------------------
-# Logo (Optional)
+# Logo (optional)
 # -------------------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-st.title("⚡ PJM Daily Energy Forecast")
+st.title(" PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -110,7 +95,7 @@ def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f"❌ Error loading model: {e}")
+        st.error(f"\u274c Error loading model: {e}")
         st.stop()
 
 model = load_model()
@@ -126,7 +111,7 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f"❌ Error loading data: {e}")
+        st.error(f"\u274c Error loading past data: {e}")
         st.stop()
 
 data = load_data()
@@ -143,7 +128,7 @@ def create_features(df):
     return df
 
 # -------------------------
-# Sidebar Inputs
+# Sidebar
 # -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
 
@@ -157,7 +142,7 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
 # -------------------------
-# Forecast Logic
+# Forecast
 # -------------------------
 df = data.copy()
 df = create_features(df)
@@ -186,9 +171,6 @@ with st.spinner("🔮 Generating Forecast..."):
         last_known = pd.concat([last_known, next_row])
         predictions.append((datetime.combine(next_date.date(), start_time), pred))
 
-# -------------------------
-# Output Results
-# -------------------------
 forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set_index("Datetime")
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
@@ -204,30 +186,51 @@ ax.set_xlabel("Date")
 ax.set_ylabel("MW")
 ax.set_title("Daily Energy Consumption Forecast")
 fig.autofmt_xdate()
+
 st.pyplot(fig)
 
 # -------------------------
-# Metrics
+# Forecast Summary (with Red Values)
 # -------------------------
-latest = forecast_df.Forecast_MW.values
-max_val = np.max(latest)
-min_val = np.min(latest)
-avg_val = np.mean(latest)
-
 st.markdown("### 📊 Forecast Summary")
+
+st.markdown("""
+<style>
+.metric-red .stMetricValue {
+    color: #B22222 !important;
+    font-weight: bold;
+}
+</style>
+""", unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns(3)
-col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
-col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
-col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
+
+with col1:
+    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
+    st.metric("🔺 Max Forecast", f"{np.max(forecast_df.Forecast_MW):.2f} MW")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col2:
+    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
+    st.metric("🔻 Min Forecast", f"{np.min(forecast_df.Forecast_MW):.2f} MW")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col3:
+    st.markdown('<div class="metric-red">', unsafe_allow_html=True)
+    st.metric("📈 Avg Forecast", f"{np.mean(forecast_df.Forecast_MW):.2f} MW")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
-# Table & Download
+# Forecast Table
 # -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
+# -------------------------
+# Download Button
+# -------------------------
 st.download_button(
-    label="📥 Download Forecast CSV",
+    label="📅 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
