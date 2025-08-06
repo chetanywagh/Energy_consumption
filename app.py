@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import matplotlib.pyplot as plt
 from datetime import timedelta, datetime, time
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -14,12 +15,10 @@ st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
 st.markdown("""
     <style>
-    /* Background Gradient */
     .reportview-container {
         background: linear-gradient(135deg, #e9f1f7 0%, #fefefe 100%);
     }
 
-    /* White stylish sidebar */
     section[data-testid="stSidebar"] {
         background-color: white;
         border-radius: 15px;
@@ -27,7 +26,6 @@ st.markdown("""
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Title and sliders */
     h1 {
         color: #0A5275;
     }
@@ -36,7 +34,6 @@ st.markdown("""
         background-color: #0A5275;
     }
 
-    /* Buttons */
     .stDownloadButton button {
         background-color: #0A5275;
         color: white;
@@ -49,7 +46,6 @@ st.markdown("""
         color: white;
     }
 
-    /* Metric style */
     .element-container:has(div[data-testid="stMetric"]) p {
         font-size: 16px;
         font-weight: 600;
@@ -58,12 +54,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# Logo (optional)
+# Optional Logo (safe load)
 # -------------------------
-st.image("cf1c74d9-df02-4984-afdf-f3c1cc2cc8af.png", width=100)
+if os.path.exists("logo.png"):
+    st.image("logo.png", width=100)
 
 # -------------------------
-# Title & Introduction
+# Title & Intro
 # -------------------------
 st.title("🔌 PJM Daily Energy Forecast")
 
