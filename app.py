@@ -19,7 +19,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("background_image.jpeg")
+img_base64 = get_base64_image("new image.jpeg")
 
 st.markdown(
     f"""
@@ -206,3 +206,4 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
