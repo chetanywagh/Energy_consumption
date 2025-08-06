@@ -18,8 +18,8 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("background_image.jpeg")  
-
+# ✅ Make sure this file exists in the same folder
+img_base64 = get_base64_image("background_image.jpeg")
 
 st.markdown(
     f"""
@@ -65,6 +65,8 @@ st.markdown(
 )
 
 # -------------------------
+# Page Config
+# -------------------------
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
 if os.path.exists("logo.png"):
@@ -75,10 +77,13 @@ st.title("🔌 PJM Daily Energy Forecast")
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
-- 📅 Forecast start date is fixed at **2018-01-02**
+- 📅 Forecast start date is fixed at **2018-01-02**  
 - 📊 Data is resampled from hourly to daily granularity
 """)
 
+# -------------------------
+# Load Model
+# -------------------------
 @st.cache_resource
 def load_model():
     try:
@@ -89,6 +94,9 @@ def load_model():
 
 model = load_model()
 
+# -------------------------
+# Load Dataset
+# -------------------------
 @st.cache_data
 def load_data():
     try:
@@ -102,6 +110,9 @@ def load_data():
 
 data = load_data()
 
+# -------------------------
+# Feature Engineering
+# -------------------------
 def create_features(df):
     df['lag_1'] = df['PJMW_MW'].shift(1)
     df['lag_2'] = df['PJMW_MW'].shift(2)
@@ -110,6 +121,9 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
+# -------------------------
+# Sidebar Controls
+# -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
@@ -121,6 +135,9 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
+# -------------------------
+# Forecast Logic
+# -------------------------
 df = data.copy()
 df = create_features(df)
 df.dropna(inplace=True)
@@ -148,14 +165,20 @@ with st.spinner("🔮 Generating Forecast..."):
         last_known = pd.concat([last_known, next_row])
         predictions.append((datetime.combine(next_date.date(), start_time), pred))
 
+# -------------------------
+# Output Data
+# -------------------------
 forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set_index("Datetime")
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
+# -------------------------
+# Plot
+# -------------------------
 st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
-plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True, edgecolor='black')
+plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)  # ✅ fixed: removed edgecolor
 ax.set_xlabel("Date")
 ax.set_ylabel("MW")
 ax.set_title("Daily Energy Consumption Forecast")
@@ -163,6 +186,9 @@ fig.autofmt_xdate()
 
 st.pyplot(fig)
 
+# -------------------------
+# Forecast Summary
+# -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
@@ -174,14 +200,18 @@ col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
+# -------------------------
+# Forecast Table
+# -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
+# -------------------------
+# Download CSV
+# -------------------------
 st.download_button(
     label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
-
