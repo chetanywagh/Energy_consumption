@@ -115,7 +115,7 @@ def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f"\u274c Error loading model: {e}")
+        st.error(f" Error loading model: {e}")
         st.stop()
 
 model = load_model()
@@ -131,7 +131,7 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f"\u274c Error loading past data: {e}")
+        st.error(f" Error loading past data: {e}")
         st.stop()
 
 data = load_data()
@@ -150,7 +150,7 @@ def create_features(df):
 # -------------------------
 # Sidebar
 # -------------------------
-st.sidebar.header("\ud83d\udee0\ufe0f Forecast Settings")
+st.sidebar.header(" Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
@@ -171,7 +171,7 @@ df.dropna(inplace=True)
 predictions = []
 last_known = df.copy()
 
-with st.spinner("\ud83d\udd2e Generating Forecast..."):
+with st.spinner(" Generating Forecast..."):
     for i in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
@@ -198,7 +198,7 @@ plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 # -------------------------
 # Plot
 # -------------------------
-st.subheader("\ud83d\udcc9 Energy Forecast Plot : ")
+st.subheader(" Energy Forecast Plot : ")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -217,7 +217,7 @@ max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("### \ud83c\udf0e Forecast Summary : ")
+st.markdown("Forecast Summary : ")
 col1, col2, col3 = st.columns(3)
 col1.metric("\ud83d\udd3a Max Forecast", f"{max_val:.2f} MW")
 col2.metric("\ud83d\udd3b Min Forecast", f"{min_val:.2f} MW")
@@ -226,15 +226,16 @@ col3.metric("\ud83d\udcc8 Avg Forecast", f"{avg_val:.2f} MW")
 # -------------------------
 # Table
 # -------------------------
-st.subheader(f"\ud83d\udccb Forecast Table - {future_days} Day(s)")
+st.subheader(f" Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
 # -------------------------
 # Download Button
 # -------------------------
 st.download_button(
-    label="\ud83d\udcc2 Download Forecast CSV",
+    label="Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
