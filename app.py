@@ -23,7 +23,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # Change your file name if needed
+img_base64 = get_base64_image("new image.jpeg")  # Change filename if needed
 
 # -------------------------
 # Custom Styling
@@ -53,29 +53,21 @@ st.markdown(
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }}
 
-    h1, h2, h3, h4, h5, h6, p, label, div {{
-        color: black !important;
-    }}
-
-    /* Forecast Summary heading bigger */
-    .stMarkdown > div > p {{
-        font-size: 28px !important;
+    /* Title size */
+    h1 {{
+        font-size: 25px !important;
         font-weight: 700 !important;
     }}
 
-    /* Metric styling */
-    .element-container:has(div[data-testid="stMetric"]) p {{
-        font-size: 26px !important;
-        font-weight: 700 !important;
-        color: darkred !important;
-        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
-    }}
-
-    .element-container:has(div[data-testid="stMetric"]) label {{
+    /* Sub-title size */
+    h2 {{
         font-size: 20px !important;
         font-weight: 600 !important;
-        color: black !important;
-        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
+    }}
+
+    /* All other text size */
+    p, label, div, span {{
+        font-size: 15px !important;
     }}
 
     .stDownloadButton button {{
@@ -224,7 +216,7 @@ max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("Forecast Summary:")
+st.subheader("Forecast Summary:")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Max Forecast", f"{max_val:.2f} MW")
