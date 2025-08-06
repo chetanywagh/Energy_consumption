@@ -23,7 +23,7 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")  # ✅ Your image name
+img_base64 = get_base64_image("new image.jpeg")  # ✅ Your image path
 
 st.markdown(
     f"""
@@ -33,11 +33,11 @@ st.markdown(
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        color: #0D1B2A !important;
+        color: #B22222 !important;
     }}
 
     h1, h2, h3, h4, h5, h6 {{
-        color: #0D1B2A !important;
+        color: #B22222 !important;
     }}
 
     section[data-testid="stSidebar"] {{
@@ -45,11 +45,11 @@ st.markdown(
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        color: #0D1B2A !important;
+        color: #B22222 !important;
     }}
 
     .stMarkdown p {{
-        color: #0D1B2A !important;
+        color: #B22222 !important;
         font-weight: 500;
     }}
 
@@ -60,25 +60,25 @@ st.markdown(
     }}
 
     .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
-        background-color: #B22222  !important;
+        background-color: #B22222 !important;
         border: 2px solid white;
     }}
 
     .stDownloadButton button {{
-        background-color: #0A5275;
+        background-color: #B22222;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
 
     .stDownloadButton button:hover {{
-        background-color: #06394f;
+        background-color: #800000;
     }}
 
     .element-container:has(div[data-testid="stMetric"]) p {{
         font-size: 16px;
         font-weight: 600;
-        color: #0D1B2A !important;
+        color: #B22222 !important;
     }}
 
     footer {{visibility: hidden;}}
@@ -232,4 +232,3 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
