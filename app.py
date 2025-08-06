@@ -98,7 +98,7 @@ if os.path.exists("logo.png"):
 # -------------------------
 # Title and Description
 # -------------------------
-st.title(" PJM Daily Energy Forecast")
+st.title(" Energy Consumption Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -238,6 +238,7 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
