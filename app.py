@@ -23,16 +23,16 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg")
+img_base64 = get_base64_image("new image.jpeg")  # change to your filename if needed
 
 # -------------------------
-# Custom Styling (Image + Gradient + Text Colors)
+# Custom Styling (light bg + larger metric text + black text + dark red values)
 # -------------------------
 st.markdown(
     f"""
     <style>
     .stApp {{
-        background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)),
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
                     url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
@@ -52,20 +52,26 @@ st.markdown(
     }}
 
     .stDownloadButton button {{
-        background-color: #4FC3F7;
+        background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
 
     .stDownloadButton button:hover {{
-        background-color: #81D4FA;
+        background-color: #06394f;
     }}
 
     .element-container:has(div[data-testid="stMetric"]) p {{
-        font-size: 16px;
+        font-size: 20px !important;
         font-weight: 600;
         color: darkred !important;
+    }}
+
+    .element-container:has(div[data-testid="stMetric"]) label {{
+        font-size: 20px !important;
+        font-weight: bold;
+        color: black !important;
     }}
 
     footer {{visibility: hidden;}}
@@ -195,7 +201,7 @@ fig.autofmt_xdate()
 st.pyplot(fig)
 
 # -------------------------
-# Summary
+# Summary (🎯 Metric Text Size Increased)
 # -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
@@ -223,6 +229,3 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
-
-
