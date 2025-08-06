@@ -10,84 +10,88 @@ warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
-st.markdown("""
+# -------------------------
+# Custom CSS + Background Image
+# -------------------------
+st.markdown(
+    f"""
     <style>
-    .reportview-container {
-        background: linear-gradient(135deg, #e9f1f7 0%, #fefefe 100%);
-    }
-
-    section[data-testid="stSidebar"] {
+    .reportview-container {{
+        background: url("background_image.png");
+        background-size: cover;
+        background-position: center;
+    }}
+    section[data-testid="stSidebar"] {{
         background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
+    }}
+    h1 {{
         color: #0A5275;
-    }
-
-    /* White Slider Track */
-    .stSlider > div[data-baseweb="slider"] > div > div {
+    }}
+    .stSlider > div[data-baseweb="slider"] > div > div {{
         background-color: white !important;
         border: 1px solid #ccc !important;
         border-radius: 5px;
-    }
-
-    /* Slider Thumb (knob) */
-    .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {
+    }}
+    .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
         background-color: #0A5275 !important;
         border: 2px solid white;
-    }
-
-    .stDownloadButton button {
+    }}
+    .stDownloadButton button {{
         background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
-    }
-
-    .stDownloadButton button:hover {
+    }}
+    .stDownloadButton button:hover {{
         background-color: #06394f;
-        color: white;
-    }
-
-    .element-container:has(div[data-testid="stMetric"]) p {
+    }}
+    .element-container:has(div[data-testid="stMetric"]) p {{
         font-size: 16px;
         font-weight: 600;
-    }
-
-    footer {
-        visibility: hidden;
-    }
+    }}
+    footer {{visibility: hidden;}}
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
-
+# -------------------------
+# Optional Logo
+# -------------------------
 if os.path.exists("logo.png"):
     st.image("logo.png", width=100)
 
-st.title(" PJM Daily Energy Forecast")
+# -------------------------
+# Title & Intro
+# -------------------------
+st.title("PJM Daily Energy Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
--📅  Forecast start date is fixed at **2018-01-02**
-
--📊 Data is resampled from hourly to daily granularity
+- 📅 Forecast start date is fixed at **2018-01-02**  
+- 📊 Data is resampled from hourly to daily granularity  
 """)
 
-
+# -------------------------
+# Load Model
+# -------------------------
 @st.cache_resource
 def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f" Error loading model: {e}")
+        st.error(f"❌ Error loading model: {e}")
         st.stop()
 
 model = load_model()
 
+# -------------------------
+# Load Dataset
+# -------------------------
 @st.cache_data
 def load_data():
     try:
@@ -96,11 +100,14 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f" Error loading past data: {e}")
+        st.error(f"❌ Error loading past data: {e}")
         st.stop()
 
 data = load_data()
 
+# -------------------------
+# Feature Engineering
+# -------------------------
 def create_features(df):
     df['lag_1'] = df['PJMW_MW'].shift(1)
     df['lag_2'] = df['PJMW_MW'].shift(2)
@@ -109,18 +116,23 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
+# -------------------------
+# Sidebar Controls
+# -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
-
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f" 📅`{start_date}` (fixed)")
+st.sidebar.markdown(f"📅 `{start_date}` (fixed)")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
 
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
+# -------------------------
+# Forecast Logic
+# -------------------------
 df = data.copy()
 df = create_features(df)
 df.dropna(inplace=True)
@@ -148,10 +160,16 @@ with st.spinner("🔮 Generating Forecast..."):
         last_known = pd.concat([last_known, next_row])
         predictions.append((datetime.combine(next_date.date(), start_time), pred))
 
+# -------------------------
+# Output Plot Data
+# -------------------------
 forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set_index("Datetime")
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
+# -------------------------
+# Plot
+# -------------------------
 st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -160,9 +178,11 @@ ax.set_xlabel("Date")
 ax.set_ylabel("MW")
 ax.set_title("Daily Energy Consumption Forecast")
 fig.autofmt_xdate()
-
 st.pyplot(fig)
 
+# -------------------------
+# Summary Section
+# -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
@@ -170,21 +190,22 @@ avg_val = np.mean(latest)
 
 st.markdown("### 📊 Forecast Summary")
 col1, col2, col3 = st.columns(3)
-col1.metric(" 🔺 Max Forecast", f"{max_val:.2f} MW")
-col2.metric(" 🔻 Min Forecast", f"{min_val:.2f} MW")
-col3.metric(" 📈 Avg Forecast", f"{avg_val:.2f} MW")
+col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
+col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
+col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
+# -------------------------
+# Forecast Table (show all selected days)
+# -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
+# -------------------------
+# Download Button
+# -------------------------
 st.download_button(
     label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
-
-
-
-
