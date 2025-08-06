@@ -10,95 +10,92 @@ import base64
 
 warnings.filterwarnings('ignore')
 
-# -------------------------
-# Page Config
-# -------------------------
+# ------------------------- Page Config -------------------------
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
-# -------------------------
-# Background Image Encoding
-# -------------------------
+# ------------------------- Background Image -------------------------
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new_image.jpeg")  # Make sure this image exists
+img_base64 = get_base64_image("background_image.jpeg")
 
-# -------------------------
-# Custom CSS Styling
-# -------------------------
 st.markdown(
     f"""
     <style>
     .stApp {{
-        background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
+        background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)),
                     url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         color: black;
     }}
+
     section[data-testid="stSidebar"] {{
         background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }}
+
     h1 {{
+        color: black !important;
         font-size: 35px !important;
         font-weight: 700 !important;
-        color: black !important;
     }}
+
     h2 {{
         font-size: 30px !important;
         font-weight: 600 !important;
-        color: black !important;
     }}
+
     p, label, div, span {{
         font-size: 22px !important;
         color: black !important;
     }}
+
     .stDownloadButton button {{
         background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
     }}
+
     .stDownloadButton button:hover {{
         background-color: #06394f;
     }}
+
     .element-container:has(div[data-testid="stMetric"]) p {{
         font-size: 22px !important;
-        font-weight: bold !important;
+        font-weight: 600;
         color: darkred !important;
     }}
+
     .element-container:has(div[data-testid="stMetric"]) label {{
-        font-size: 20px !important;
-        font-weight: bold !important;
+        font-size: 22px !important;
+        font-weight: bold;
         color: black !important;
     }}
+
     footer {{visibility: hidden;}}
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# -------------------------
-# Title & Description
-# -------------------------
+# ------------------------- Title -------------------------
 st.title("PJM Daily Energy Forecast")
 
 st.markdown("""
-This web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
+This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
-- Forecast start date: **2018-01-02**  
-- Data is resampled from hourly to **daily granularity**
+- 📅 Forecast start date is fixed at **2018-01-02**  
+- 📊 Data is resampled from hourly to daily granularity
 """)
 
-# -------------------------
-# Load Model
-# -------------------------
+# ------------------------- Load Model -------------------------
 @st.cache_resource
 def load_model():
     try:
@@ -109,9 +106,7 @@ def load_model():
 
 model = load_model()
 
-# -------------------------
-# Load Data
-# -------------------------
+# ------------------------- Load Data -------------------------
 @st.cache_data
 def load_data():
     try:
@@ -125,9 +120,7 @@ def load_data():
 
 data = load_data()
 
-# -------------------------
-# Feature Engineering
-# -------------------------
+# ------------------------- Feature Engineering -------------------------
 def create_features(df):
     df['lag_1'] = df['PJMW_MW'].shift(1)
     df['lag_2'] = df['PJMW_MW'].shift(2)
@@ -136,23 +129,17 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
-# -------------------------
-# Sidebar
-# -------------------------
+# ------------------------- Sidebar -------------------------
 st.sidebar.header("🛠️ Forecast Settings")
-
 start_date = datetime(2018, 1, 2).date()
-st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f"`{start_date}`")
+st.sidebar.markdown(f"📅 **Forecast Start Date:** `{start_date}`")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
 
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
-# -------------------------
-# Forecast Logic
-# -------------------------
+# ------------------------- Forecast Logic -------------------------
 df = data.copy()
 df = create_features(df)
 df.dropna(inplace=True)
@@ -161,7 +148,7 @@ predictions = []
 last_known = df.copy()
 
 with st.spinner("🔮 Generating Forecast..."):
-    for i in range(future_days):
+    for _ in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
             continue
@@ -184,9 +171,7 @@ forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
-# -------------------------
-# Plot
-# -------------------------
+# ------------------------- Plot -------------------------
 st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -198,9 +183,7 @@ fig.autofmt_xdate()
 
 st.pyplot(fig)
 
-# -------------------------
-# Summary
-# -------------------------
+# ------------------------- Summary -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
@@ -212,15 +195,11 @@ col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
-# -------------------------
-# Forecast Table
-# -------------------------
+# ------------------------- Forecast Table -------------------------
 st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
-# -------------------------
-# Download CSV
-# -------------------------
+# ------------------------- Download -------------------------
 st.download_button(
     label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
