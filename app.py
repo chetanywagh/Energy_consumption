@@ -60,7 +60,7 @@ st.markdown(
     }}
 
     .stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {{
-        background-color: #0A5275 !important;
+        background-color: #B22222  !important;
         border: 2px solid white;
     }}
 
@@ -232,3 +232,4 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
