@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 # Background Image Styling
 # -------------------------
 def get_base64_image(image_path):
-    with open("C:\Users\Lenovo\Downloads\background_image.png.jpeg", "rb") as image_file:
+    with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
