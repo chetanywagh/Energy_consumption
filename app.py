@@ -11,78 +11,73 @@ import base64
 warnings.filterwarnings('ignore')
 
 # -------------------------
-# Set Page Config
+# Page Config
 # -------------------------
 st.set_page_config(page_title="PJM Daily Energy Forecast", layout="centered")
 
 # -------------------------
-# Load & Encode Background Image
+# Background Image Encoding
 # -------------------------
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("new image.jpeg") 
+img_base64 = get_base64_image("new_image.jpeg")  # Make sure this image exists
 
 # -------------------------
-# Custom Styling
+# Custom CSS Styling
 # -------------------------
 st.markdown(
     f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap');
-
-    html, body, [class*="css"] {{
-        font-family: 'Segoe UI', 'Roboto', 'Helvetica', sans-serif;
-        color: black;
-    }}
-
     .stApp {{
-        background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+        background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
                     url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        color: black;
     }}
-
     section[data-testid="stSidebar"] {{
         background-color: white;
         border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }}
-
-   /* Title */
-h1 {
-    font-size: 32px !important;
-    font-weight: 700 !important;
-}
-
-/* Sub-title */
-h2 {
-    font-size: 26px !important;
-    font-weight: 600 !important;
-}
-
-/* Body Text, Labels, Sidebar */
-p, label, div, span {
-    font-size: 20px !important;
-}
-
-
+    h1 {{
+        font-size: 35px !important;
+        font-weight: 700 !important;
+        color: black !important;
+    }}
+    h2 {{
+        font-size: 30px !important;
+        font-weight: 600 !important;
+        color: black !important;
+    }}
+    p, label, div, span {{
+        font-size: 22px !important;
+        color: black !important;
+    }}
     .stDownloadButton button {{
-        background-color: #81D4FA;
+        background-color: #0A5275;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
-        font-weight: 600;
     }}
-
     .stDownloadButton button:hover {{
-        background-color: #4FC3F7;
+        background-color: #06394f;
     }}
-
+    .element-container:has(div[data-testid="stMetric"]) p {{
+        font-size: 22px !important;
+        font-weight: bold !important;
+        color: darkred !important;
+    }}
+    .element-container:has(div[data-testid="stMetric"]) label {{
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: black !important;
+    }}
     footer {{visibility: hidden;}}
     </style>
     """,
@@ -90,21 +85,15 @@ p, label, div, span {
 )
 
 # -------------------------
-# Logo (Optional)
+# Title & Description
 # -------------------------
-if os.path.exists("logo.png"):
-    st.image("logo.png", width=100)
-
-# -------------------------
-# Title and Description
-# -------------------------
-st.title("Energy Consumption Forecast")
+st.title("PJM Daily Energy Forecast")
 
 st.markdown("""
-This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
+This web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
 
-- Forecast start date is fixed at **2018-01-02**  
-- Data is resampled from hourly to daily granularity
+- Forecast start date: **2018-01-02**  
+- Data is resampled from hourly to **daily granularity**
 """)
 
 # -------------------------
@@ -115,7 +104,7 @@ def load_model():
     try:
         return joblib.load("xgb_energy_forecast_model.joblib")
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"❌ Error loading model: {e}")
         st.stop()
 
 model = load_model()
@@ -131,7 +120,7 @@ def load_data():
         daily_df = df.resample("D").mean()
         return daily_df
     except Exception as e:
-        st.error(f"Error loading past data: {e}")
+        st.error(f"❌ Error loading past data: {e}")
         st.stop()
 
 data = load_data()
@@ -150,11 +139,11 @@ def create_features(df):
 # -------------------------
 # Sidebar
 # -------------------------
-st.sidebar.header("Forecast Settings")
+st.sidebar.header("🛠️ Forecast Settings")
 
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown("**Forecast Start Date:**")
-st.sidebar.markdown(f"`{start_date}` (fixed)")
+st.sidebar.markdown(f"`{start_date}`")
 
 hourly_times = [time(h, 0) for h in range(24)]
 start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0)
@@ -171,7 +160,7 @@ df.dropna(inplace=True)
 predictions = []
 last_known = df.copy()
 
-with st.spinner("Generating Forecast..."):
+with st.spinner("🔮 Generating Forecast..."):
     for i in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
@@ -198,7 +187,7 @@ plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 # -------------------------
 # Plot
 # -------------------------
-st.subheader("Energy Forecast Plot:")
+st.subheader("📉 Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -210,34 +199,31 @@ fig.autofmt_xdate()
 st.pyplot(fig)
 
 # -------------------------
-# Forecast Summary
+# Summary
 # -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.subheader("Forecast Summary:")
-
+st.markdown("### 📊 Forecast Summary")
 col1, col2, col3 = st.columns(3)
-col1.metric("Max Forecast", f"{max_val:.2f} MW")
-col2.metric("Min Forecast", f"{min_val:.2f} MW")
-col3.metric("Avg Forecast", f"{avg_val:.2f} MW")
+col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
+col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
+col3.metric("📈 Avg Forecast", f"{avg_val:.2f} MW")
 
 # -------------------------
-# Table
+# Forecast Table
 # -------------------------
-st.subheader(f"Forecast Table - {future_days} Day(s)")
+st.subheader(f"📋 Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
 # -------------------------
-# Download Button
+# Download CSV
 # -------------------------
 st.download_button(
-    label="Download Forecast CSV",
+    label="📥 Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
-
-
