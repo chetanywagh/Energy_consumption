@@ -42,17 +42,17 @@ st.markdown(
 
     h1 {{
         color: black !important;
-        font-size: 35px !important;
+        font-size: 30px !important;
         font-weight: 700 !important;
     }}
 
     h2 {{
-        font-size: 30px !important;
+        font-size: 25px !important;
         font-weight: 600 !important;
     }}
 
     p, label, div, span {{
-        font-size: 22px !important;
+        font-size: 20px !important;
         color: black !important;
     }}
 
@@ -206,4 +206,5 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
