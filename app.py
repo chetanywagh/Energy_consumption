@@ -189,7 +189,7 @@ plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 # -------------------------
 # Plot
 # -------------------------
-st.subheader(" Energy Forecast Plot")
+st.subheader(" Energy Forecast Plot : ")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -208,7 +208,7 @@ max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("###  Forecast Summary")
+st.markdown("###  Forecast Summary : ")
 col1, col2, col3 = st.columns(3)
 col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
@@ -229,6 +229,7 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
