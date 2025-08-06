@@ -89,7 +89,7 @@ if os.path.exists("logo.png"):
 # -------------------------
 # Title and Description
 # -------------------------
-st.title("⚡️ Energy Consumption Forecast")
+st.title(" Energy Consumption Forecast")
 
 st.markdown("""
 This professional web application forecasts **daily energy consumption** (in MW) for the PJM region using a trained **XGBoost** model.
@@ -162,7 +162,7 @@ df.dropna(inplace=True)
 predictions = []
 last_known = df.copy()
 
-with st.spinner("🔮 Generating Forecast..."):
+with st.spinner(" Generating Forecast..."):
     for i in range(future_days):
         next_date = last_known.index[-1] + timedelta(days=1)
         if next_date < pd.to_datetime(start_date):
@@ -189,7 +189,7 @@ plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 # -------------------------
 # Plot
 # -------------------------
-st.subheader("📉 Energy Forecast Plot")
+st.subheader(" Energy Forecast Plot")
 
 fig, ax = plt.subplots(figsize=(12, 5))
 plot_df.plot(ax=ax, linewidth=2, marker='o', grid=True)
@@ -208,7 +208,7 @@ max_val = np.max(latest)
 min_val = np.min(latest)
 avg_val = np.mean(latest)
 
-st.markdown("### 📊 Forecast Summary")
+st.markdown("###  Forecast Summary")
 col1, col2, col3 = st.columns(3)
 col1.metric("🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric("🔻 Min Forecast", f"{min_val:.2f} MW")
@@ -224,10 +224,11 @@ st.dataframe(forecast_df.reset_index().head(future_days))
 # Download Button
 # -------------------------
 st.download_button(
-    label="📥 Download Forecast CSV",
+    label=" Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
