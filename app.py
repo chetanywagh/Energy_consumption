@@ -18,13 +18,14 @@ def get_base64_image(image_path):
         encoded = base64.b64encode(image_file.read()).decode()
     return encoded
 
-img_base64 = get_base64_image("background_image.jpeg")
+img_base64 = get_base64_image("background_image.jpeg")  
+
 
 st.markdown(
     f"""
     <style>
     .reportview-container {{
-        background: url("data:image/png;base64,{img_base64}");
+        background: url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-position: center;
     }}
@@ -182,4 +183,5 @@ st.download_button(
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
