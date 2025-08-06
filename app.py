@@ -35,37 +35,56 @@ def create_features(data):
     data['month'] = data.index.month
     return data
 
-# Generate future dates
-last_datetime = df.index[-1]
-future_dates = pd.date_range(start=last_datetime + timedelta(hours=1), periods=days*24, freq='H')
-
-# Combine with original for lag features
+# Copy original dataframe
 full_df = df.copy()
 
+# Generate future dates
+last_datetime = full_df.index[-1]
+future_dates = pd.date_range(start=last_datetime + timedelta(hours=1), periods=days * 24, freq='H')
+
+# Forecast list to store results
+forecast_values = []
+
 for future_date in future_dates:
+    # Create empty row
     new_row = pd.DataFrame(index=[future_date])
     full_df = pd.concat([full_df, new_row])
 
+    # Apply feature engineering on updated dataframe
     full_df = create_features(full_df)
-    
-    latest_row = full_df.loc[[future_date]].drop(columns=['PJMW_MW'], errors='ignore')
-    latest_row = latest_row[['lag_1', 'lag_2', 'rolling_mean_3', 'dayofweek', 'month']]
 
-    if latest_row.isnull().any().any():
-        full_df.loc[future_date, 'PJMW_MW'] = np.nan
+    # Get latest row for prediction
+    latest_row = full_df.loc[[future_date]]
+    
+    # Select only required features
+    try:
+        features = latest_row[['lag_1', 'lag_2', 'rolling_mean_3', 'dayofweek', 'month']]
+    except KeyError:
+        forecast_values.append(np.nan)
         continue
 
-    forecast_value = model.predict(latest_row)[0]
-    full_df.loc[future_date, 'PJMW_MW'] = forecast_value
+    # Handle missing values
+    if features.isnull().values.any():
+        forecast_values.append(np.nan)
+        continue
 
-# Extract forecast part
-forecast_df = full_df.loc[future_dates]
-forecast_df = forecast_df[['PJMW_MW']].rename(columns={'PJMW_MW': 'Forecast_MW'})
+    # Predict using model
+    prediction = model.predict(features)[0]
+    
+    # Store prediction
+    full_df.at[future_date, 'PJMW_MW'] = prediction
+    forecast_values.append(prediction)
+
+# Prepare forecast dataframe
+forecast_df = pd.DataFrame({
+    'Datetime': future_dates,
+    'Forecast_MW': forecast_values
+}).set_index('Datetime')
 
 # Plot
 st.subheader(f"📊 Forecast for next {days} day(s)")
-st.line_chart(forecast_df)
+st.line_chart(forecast_df['Forecast_MW'])
 
-# Show data table
+# Show forecast table
 with st.expander("📄 See Forecasted Values"):
-    st.dataframe(forecast_df.reset_index().rename(columns={'index': 'Datetime'}))
+    st.dataframe(forecast_df.reset_index())
