@@ -91,7 +91,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ------------------------- Title -------------------------
 st.title("Energy Consumption Forecast")
 
 st.markdown("""
@@ -101,7 +100,6 @@ This professional web application forecasts **daily energy consumption** (in MW)
 -  Data is resampled from hourly to daily granularity
 """)
 
-# ------------------------- Load Model -------------------------
 @st.cache_resource
 def load_model():
     try:
@@ -112,7 +110,6 @@ def load_model():
 
 model = load_model()
 
-# ------------------------- Load Data -------------------------
 @st.cache_data
 def load_data():
     try:
@@ -126,7 +123,6 @@ def load_data():
 
 data = load_data()
 
-# ------------------------- Feature Engineering -------------------------
 def create_features(df):
     df['lag_1'] = df['PJMW_MW'].shift(1)
     df['lag_2'] = df['PJMW_MW'].shift(2)
@@ -135,7 +131,6 @@ def create_features(df):
     df['month'] = df.index.month
     return df
 
-# ------------------------- Sidebar -------------------------
 st.sidebar.header("🛠 Forecast Settings")
 start_date = datetime(2018, 1, 2).date()
 st.sidebar.markdown(f" **Forecast Start Date:** `{start_date}`")
@@ -145,7 +140,6 @@ start_time = st.sidebar.selectbox("Select Time (hourly):", hourly_times, index=0
 
 future_days = st.sidebar.slider("Days to Forecast:", min_value=1, max_value=50, value=7)
 
-# ------------------------- Forecast Logic -------------------------
 df = data.copy()
 df = create_features(df)
 df.dropna(inplace=True)
@@ -188,7 +182,6 @@ fig.autofmt_xdate()
 
 st.pyplot(fig)
 
-# ------------------------- Summary -------------------------
 latest = forecast_df.Forecast_MW.values
 max_val = np.max(latest)
 min_val = np.min(latest)
@@ -200,17 +193,17 @@ col1.metric(" 🔺 Max Forecast", f"{max_val:.2f} MW")
 col2.metric(" 🔻 Min Forecast", f"{min_val:.2f} MW")
 col3.metric(" 📈 Avg Forecast", f"{avg_val:.2f} MW")
 
-# ------------------------- Forecast Table -------------------------
 st.subheader(f" Forecast Table - {future_days} Day(s)")
 st.dataframe(forecast_df.reset_index().head(future_days))
 
-# ------------------------- Download -------------------------
+
 st.download_button(
     label=" Download Forecast CSV",
     data=forecast_df.reset_index().to_csv(index=False),
     file_name="daily_energy_forecast.csv",
     mime="text/csv"
 )
+
 
 
 
