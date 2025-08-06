@@ -120,6 +120,7 @@ forecast_df = pd.DataFrame(predictions, columns=["Datetime", "Forecast_MW"]).set
 recent_actual = df[["PJMW_MW"]].rename(columns={"PJMW_MW": "Actual_MW"}).tail(30)
 plot_df = pd.concat([recent_actual, forecast_df], axis=0)
 
+
 # ----------------------
 # Visualization
 # ----------------------
@@ -134,6 +135,28 @@ plt.title("PJM Daily Forecast vs Actual Energy Consumption")
 plt.tight_layout()
 plt.grid(True)
 st.pyplot(fig)
+
+# ----------------------
+# 📄 Show Forecast Table
+# ----------------------
+st.markdown("### 📋 Forecasted Energy Consumption (MW)")
+st.dataframe(
+    forecast_df.reset_index().rename(columns={
+        "Datetime": "Date",
+        "Forecast_MW": "Forecasted Consumption (MW)"
+    }),
+    use_container_width=True
+)
+
+# ----------------------
+# Download Forecast
+# ----------------------
+st.download_button(
+    label="📥 Download Forecast CSV",
+    data=forecast_df.reset_index().to_csv(index=False),
+    file_name="pjm_energy_forecast.csv",
+    mime="text/csv"
+)
 
 # ----------------------
 # Download Forecast
