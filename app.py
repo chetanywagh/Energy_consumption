@@ -36,7 +36,7 @@ model = load_model()
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("PJMW_hourly", parse_dates=["Datetime"])
+        df = pd.read_csv("PJMW_hourly.csv", parse_dates=["Datetime"])
         df.set_index("Datetime", inplace=True)
         daily_df = df.resample("D").mean()
         return daily_df
@@ -152,4 +152,5 @@ st.download_button("📥 Download Forecast Data as CSV",
                    data=forecast_df.reset_index().to_csv(index=False),
                    file_name="daily_forecast.csv",
                    mime="text/csv")
+
 
